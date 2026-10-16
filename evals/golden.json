@@ -1,0 +1,33 @@
+[
+  {
+    "must_contain": [
+      "3,842.17"
+    ],
+    "question": "What is my new balance?",
+    "require_citation": true
+  },
+  {
+    "must_contain": [
+      "64.99",
+      "14.99",
+      "29.95"
+    ],
+    "question": "List all Amazon transactions.",
+    "require_citation": true
+  },
+  {
+    "must_contain": [
+      "109.93"
+    ],
+    "question": "What was my total Amazon spend?",
+    "require_citation": false
+  },
+  {
+    "must_contain": [
+      "couldn't find",
+      "not contain"
+    ],
+    "question": "What is the CEO's salary?",
+    "require_citation": false
+  }
+]

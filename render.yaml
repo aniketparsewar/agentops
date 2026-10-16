@@ -1,0 +1,20 @@
+# Render Blueprint: deploy with `render.yaml` at the repo root.
+services:
+  - type: web
+    name: agentops
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false            # set in the Render dashboard (secret)
+      - key: API_KEY
+        generateValue: true    # this service's own key
+      - key: SHIPDOCCHAT_URL
+        value: "https://ship-docchat.onrender.com"
+      - key: SHIPDOCCHAT_API_KEY
+        sync: false            # key for the deployed ShipDocChat service (secret)
+      - key: DAILY_BUDGET_USD
+        value: "1.00"
+      - key: RATE_LIMIT_PER_MIN
+        value: "30"

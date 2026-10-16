@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>AgentOps</title>
+<style>
+body{font-family:system-ui;max-width:720px;margin:2rem auto;padding:0 1rem}
+input,textarea,button{font-size:1rem;padding:.4rem;margin:.2rem 0}
+textarea{width:100%;height:4rem}
+pre{background:#f4f4f4;padding:1rem;white-space:pre-wrap}
+.meta{color:#555;font-size:.85rem}
+.pass{color:green;font-weight:bold}.fail{color:red;font-weight:bold}.skip{color:#888}
+</style></head>
+<body>
+<h1>AgentOps — self-evaluating agent</h1>
+<p><input id="key" type="password" placeholder="X-API-Key" size="40"></p>
+<h2>Ask the agent</h2>
+<textarea id="q" placeholder="What is my new balance?"></textarea><br>
+<button onclick="ask()">Ask</button>
+<pre id="answer"></pre>
+<p class="meta" id="askMeta"></p>
+<p id="watcher"></p>
+<h2>Metrics</h2>
+<button onclick="loadMetrics()">Load /metrics</button>
+<pre id="metricsOut" class="meta"></pre>
+<script>
+const headers=()=>({"X-API-Key":document.getElementById("key").value});
+async function ask(){
+  const q=document.getElementById("q").value;
+  const r=await fetch("/ask_agent",{method:"POST",
+    headers:{...headers(),"Content-Type":"application/json"},
+    body:JSON.stringify({question:q})});
+  const j=await r.json();
+  if(!r.ok){document.getElementById("answer").textContent=`Error ${r.status}: ${j.detail}`;return;}
+  document.getElementById("answer").textContent=j.answer;
+  document.getElementById("askMeta").textContent=
+    `${j.latency_ms}ms · ${j.input_tokens} in / ${j.output_tokens} out · ~$${j.cost_usd} · ${j.tool_calls.length} tool call(s) · budget $${j.budget_remaining}`;
+  const w=j.watcher, el=document.getElementById("watcher");
+  if(!w.evaluated){el.innerHTML=`<span class="skip">watcher: no golden case for this question</span>`;}
+  else{el.innerHTML=`watcher: <span class="${w.passed?"pass":"fail"}">${w.passed?"PASS":"FAIL"}</span> — `+
+    w.checks.map(c=>`${c.passed?"✓":"✗"} ${c.check}`).join("; ");}
+}
+async function loadMetrics(){
+  const r=await fetch("/metrics",{headers:headers()});
+  const j=await r.json();
+  document.getElementById("metricsOut").textContent=
+    r.ok?JSON.stringify(j,null,2):`Error ${r.status}: ${j.detail}`;
+}
+</script>
+</body></html>
